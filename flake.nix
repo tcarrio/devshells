@@ -19,19 +19,19 @@
         "aarch64-darwin" # 64-bit Apple Silicon
       ];
 
-      node16Overlay = self: super: {
+      node16Overlay = final: pre: {
         nodejs = self.nodejs-16_x;
       };
-      yarn16Overlay = self: super: {
+      yarn16Overlay = final: pre: {
         yarn = super.yarn.override {
           nodejs = self.nodejs-16_x;
         };
       };
 
-      node18Overlay = self: super: {
+      node18Overlay = final: pre: {
         nodejs = self.nodejs-18_x;
       };
-      yarn18Overlay = self: super: {
+      yarn18Overlay = final: pre: {
         yarn = super.yarn.override {
           nodejs = self.nodejs-18_x;
         };
