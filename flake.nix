@@ -5,11 +5,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
     nixphps.url = "github:fossar/nix-phps";
-    nixpkgs2205.url = "github:NixOS/nixpkgs/22.05";
   };
 
   # Flake outputs
-  outputs = { self, nixpkgs, nixphps, nixpkgs2205 }:
+  outputs = { self, nixpkgs, nixphps }:
     let
       # Systems supported
       allSystems = [
@@ -19,21 +18,27 @@
         "aarch64-darwin" # 64-bit Apple Silicon
       ];
 
-      node16Overlay = final: pre: {
-        nodejs = self.nodejs-16_x;
-      };
-      yarn16Overlay = final: pre: {
-        yarn = super.yarn.override {
-          nodejs = self.nodejs-16_x;
+      yarn14Overlay = final: pre: {
+        yarn = pre.yarn.override {
+          nodejs = final.nodejs-14_x;
         };
       };
 
-      node18Overlay = final: pre: {
-        nodejs = self.nodejs-18_x;
+      yarn16Overlay = final: pre: {
+        yarn = pre.yarn.override {
+          nodejs = final.nodejs-16_x;
+        };
       };
+
       yarn18Overlay = final: pre: {
-        yarn = super.yarn.override {
-          nodejs = self.nodejs-18_x;
+        yarn = pre.yarn.override {
+          nodejs = final.nodejs-18_x;
+        };
+      };
+
+      yarn20Overlay = final: pre: {
+        yarn = pre.yarn.override {
+          nodejs = final.nodejs-20_x;
         };
       };
 
@@ -44,20 +49,27 @@
         pkgs = import nixpkgs {
           inherit system;
         };
+        pkgsNode14 = import nixpkgs {
+          inherit system;
+          overlays = [yarn14Overlay];
+        };
         pkgsNode16 = import nixpkgs {
           inherit system;
-          overlays = [node16Overlay yarn16Overlay];
+          overlays = [yarn16Overlay];
         };
         pkgsNode18 = import nixpkgs {
           inherit system;
-          overlays = [node18Overlay yarn18Overlay];
+          overlays = [yarn18Overlay];
         };
-        pkgs2205 = import nixpkgs2205 { inherit system; };
+        pkgsNode20 = import nixpkgs {
+          inherit system;
+          overlays = [yarn20Overlay];
+        };
       });
     in
     {
       # Development environment output
-      devShells = forAllSystems ({ pkgs, pkgsNode16, pkgsNode18, pkgs2205 }:
+      devShells = forAllSystems ({ pkgs, pkgsNode14, pkgsNode16, pkgsNode18, pkgsNode20 }:
         let
           coreShellPackages = [
             pkgs.zsh
@@ -67,6 +79,11 @@
             pkgs.jq
             pkgs.sops
           ];
+          coreNode14Packages = [
+            pkgsNode14.nodejs-14_x
+            pkgsNode14.yarn
+            pkgs.python3 # required for native compilation of common libraries such as node-sass
+          ];
           coreNode16Packages = [
             pkgsNode16.nodejs-16_x
             pkgsNode16.yarn
@@ -75,6 +92,11 @@
           coreNode18Packages = [
             pkgsNode18.nodejs-18_x
             pkgsNode18.yarn
+            pkgs.python3 # required for native compilation of common libraries such as node-sass
+          ];
+          coreNode20Packages = [
+            pkgsNode20.nodejs-20_x
+            pkgsNode20.yarn
             pkgs.python3 # required for native compilation of common libraries such as node-sass
           ];
           corePhpPackages = [
@@ -111,9 +133,19 @@
           '';
           phpShellHookCommand = shellHookCommandFactory { php = true; };
           nodeShellHookCommand = shellHookCommandFactory { node = true; yarn = true; };
-        in 
+        in rec
         {
           ### Generic language shells (NodeJS, PHP, etc.)
+
+          node14 = pkgs.mkShell {
+            packages = with pkgsNode14; [
+              nodePackages.pnpm
+            ] ++ coreShellPackages ++ coreDevPackages ++ coreNode14Packages;
+
+            PROJECT_NAME = "NodeJS LTS v14";
+
+            shellHook = nodeShellHookCommand;
+          };
 
           node16 = pkgs.mkShell {
             packages = with pkgsNode16; [
@@ -131,6 +163,16 @@
             ] ++ coreShellPackages ++ coreDevPackages ++ coreNode18Packages;
 
             PROJECT_NAME = "NodeJS LTS v18";
+
+            shellHook = nodeShellHookCommand;
+          };
+
+          node20 = pkgs.mkShell {
+            packages = with pkgsNode20; [
+              nodePackages.pnpm
+            ] ++ coreShellPackages ++ coreDevPackages ++ coreNode20Packages;
+
+            PROJECT_NAME = "NodeJS LTS v20";
 
             shellHook = nodeShellHookCommand;
           };
@@ -186,6 +228,10 @@
 
             shellHook = shellHookCommandFactory { bun = true; };
           };
+
+          # Default aliases
+          node = node18;
+          php = php82;
         }
       );
     };
