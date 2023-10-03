@@ -3,7 +3,7 @@
 
   # Flake inputs
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     nixphps.url = "github:fossar/nix-phps";
   };
 
@@ -20,29 +20,30 @@
 
       yarn14Overlay = final: pre: {
         yarn = pre.yarn.override {
-          nodejs = final.nodejs-14_x;
+          nodejs = final.nodejs_14;
         };
       };
 
       yarn16Overlay = final: pre: {
         yarn = pre.yarn.override {
-          nodejs = final.nodejs-16_x;
+          nodejs = final.nodejs_16;
         };
       };
 
       yarn18Overlay = final: pre: {
         yarn = pre.yarn.override {
-          nodejs = final.nodejs-18_x;
+          nodejs = final.nodejs_18;
         };
       };
 
       yarn20Overlay = final: pre: {
         yarn = pre.yarn.override {
-          nodejs = final.nodejs-20_x;
+          nodejs = final.nodejs_20;
         };
       };
 
       # Helper to provide system-specific attributes
+
       nameValuePair = name: value: { inherit name value; };
       genAttrs = names: f: builtins.listToAttrs (map (n: nameValuePair n (f n)) names);
       forAllSystems = f: genAttrs allSystems (system: f {
@@ -80,22 +81,22 @@
             pkgs.sops
           ];
           coreNode14Packages = [
-            pkgsNode14.nodejs-14_x
+            pkgsNode14.nodejs_14
             pkgsNode14.yarn
             pkgs.python3 # required for native compilation of common libraries such as node-sass
           ];
           coreNode16Packages = [
-            pkgsNode16.nodejs-16_x
+            pkgsNode16.nodejs_16
             pkgsNode16.yarn
             pkgs.python3 # required for native compilation of common libraries such as node-sass
           ];
           coreNode18Packages = [
-            pkgsNode18.nodejs-18_x
+            pkgsNode18.nodejs_18
             pkgsNode18.yarn
             pkgs.python3 # required for native compilation of common libraries such as node-sass
           ];
           coreNode20Packages = [
-            pkgsNode20.nodejs-20_x
+            pkgsNode20.nodejs_20
             pkgsNode20.yarn
             pkgs.python3 # required for native compilation of common libraries such as node-sass
           ];
@@ -138,9 +139,8 @@
           ### Generic language shells (NodeJS, PHP, etc.)
 
           node14 = pkgs.mkShell {
-            packages = with pkgsNode14; [
-              nodePackages.pnpm
-            ] ++ coreShellPackages ++ coreDevPackages ++ coreNode14Packages;
+            packages = with pkgsNode14;
+              coreShellPackages ++ coreDevPackages ++ coreNode14Packages;
 
             PROJECT_NAME = "NodeJS LTS v14";
 
@@ -148,9 +148,8 @@
           };
 
           node16 = pkgs.mkShell {
-            packages = with pkgsNode16; [
-              nodePackages.pnpm
-            ] ++ coreShellPackages ++ coreDevPackages ++ coreNode16Packages;
+            packages = with pkgsNode16;
+              coreShellPackages ++ coreDevPackages ++ coreNode16Packages;
 
             PROJECT_NAME = "NodeJS LTS v16";
 
@@ -158,9 +157,8 @@
           };
 
           node18 = pkgs.mkShell {
-            packages = with pkgsNode18; [
-              nodePackages.pnpm
-            ] ++ coreShellPackages ++ coreDevPackages ++ coreNode18Packages;
+            packages = with pkgsNode18;
+              coreShellPackages ++ coreDevPackages ++ coreNode18Packages;
 
             PROJECT_NAME = "NodeJS LTS v18";
 
@@ -168,9 +166,8 @@
           };
 
           node20 = pkgs.mkShell {
-            packages = with pkgsNode20; [
-              nodePackages.pnpm
-            ] ++ coreShellPackages ++ coreDevPackages ++ coreNode20Packages;
+            packages = with pkgsNode20;
+              coreShellPackages ++ coreDevPackages ++ coreNode20Packages;
 
             PROJECT_NAME = "NodeJS LTS v20";
 
