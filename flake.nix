@@ -226,6 +226,16 @@
             shellHook = shellHookCommandFactory { bun = true; };
           };
 
+          # Project aliases
+          "signalapp/Signal-Desktop" = pkgs.mkShell {
+            packages = with pkgs; [
+              python3
+              gcc
+              gnumake
+              gnat
+            ] ++ coreShellPackages ++ coreDevPackages ++ coreNode18Packages;
+          };
+
           # Default aliases
           node = node18;
           php = php82;
