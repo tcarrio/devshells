@@ -120,7 +120,7 @@
             pkgs.php82.packages.composer
           ];
           emptyStr = "";
-          shellHookCommandFactory = { git ? true, php ? false, node ? false, yarn ? false, pnpm ? false, python ? false, bun ? false }: ''
+          shellHookCommandFactory = { git ? true, php ? false, node ? false, yarn ? false, pnpm ? false, python ? false, bun ? false, deno ? false }: ''
             echo $ Started devenv shell for $PROJECT_NAME
             echo
             ${if git    then ''git --version''                             else emptyStr}
@@ -130,6 +130,7 @@
             ${if python then ''echo "python version $(python --version)"'' else emptyStr}
             ${if php    then ''php --version''                             else emptyStr}
             ${if bun    then ''echo "bun version $(bun --version)"''       else emptyStr}
+            ${if deno   then ''deno --version''                            else emptyStr}
             echo
           '';
           phpShellHookCommand = shellHookCommandFactory { php = true; };
@@ -224,6 +225,16 @@
             PROJECT_NAME = "Bun";
 
             shellHook = shellHookCommandFactory { bun = true; };
+          };
+
+          deno = pkgs.mkShell {
+            packages = [
+              pkgs.deno
+            ] ++ coreShellPackages ++ coreDevPackages;
+
+            PROJECT_NAME = "Deno";
+
+            shellHook = shellHookCommandFactory { deno = true; };
           };
 
           # Project aliases
