@@ -18,11 +18,14 @@
   # Flake inputs
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs2405.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs2305.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs2205.url = "github:nixos/nixpkgs/nixos-22.05";
     nixphps.url = "github:fossar/nix-phps";
   };
 
   # Flake outputs
-  outputs = { self, nixpkgs, nixphps }:
+  outputs = { self, nixpkgs, nixphps, nixpkgs2405, nixpkgs2305, nixpkgs2205 }:
     let
       # Systems supported
       allSystems = [
@@ -70,20 +73,20 @@
 
       # Helper to provide system-specific attributes
 
-      importWithOverlays = system: overlays: import nixpkgs {
+      importWithOverlays = input: system: overlays: import input {
         inherit system;
         overlays = overlays;
       };
       nameValuePair = name: value: { inherit name value; };
       genAttrs = names: f: builtins.listToAttrs (map (n: nameValuePair n (f n)) names);
       forAllSystems = f: genAttrs allSystems (system: f {
-        pkgs = importWithOverlays system [];
-        pkgsNode14 = importWithOverlays system [yarn14Overlay];
-        pkgsNode16 = importWithOverlays system [yarn16Overlay];
-        pkgsNode18 = importWithOverlays system [yarn18Overlay];
-        pkgsNode20 = importWithOverlays system [yarn20Overlay];
-        pkgsNode22 = importWithOverlays system [yarn22Overlay];
-        pkgsNode24 = importWithOverlays system [yarn24Overlay];
+        pkgs = importWithOverlays nixpkgs system [];
+        pkgsNode14 = importWithOverlays nixpkgs2205 system [yarn14Overlay];
+        pkgsNode16 = importWithOverlays nixpkgs2305 system [yarn16Overlay];
+        pkgsNode18 = importWithOverlays nixpkgs2405 system [yarn18Overlay];
+        pkgsNode20 = importWithOverlays nixpkgs system [yarn20Overlay];
+        pkgsNode22 = importWithOverlays nixpkgs system [yarn22Overlay];
+        pkgsNode24 = importWithOverlays nixpkgs system [yarn24Overlay];
       });
     in
     {
