@@ -1,9 +1,23 @@
 {
   description = "Development shell environments";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://cache.nixos.org"
+      "https://cache.garnix.io"
+    ];
+    extra-trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+    ];
+    extra-trusted-substituters = [
+      "https://cache.nixos.org"
+    ];
+  };
+
   # Flake inputs
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     nixphps.url = "github:fossar/nix-phps";
   };
 
@@ -42,35 +56,39 @@
         };
       };
 
+      yarn22Overlay = final: pre: {
+        yarn = pre.yarn.override {
+          nodejs = final.nodejs_22;
+        };
+      };
+
+      yarn24Overlay = final: pre: {
+        yarn = pre.yarn.override {
+          nodejs = final.nodejs_24;
+        };
+      };
+
       # Helper to provide system-specific attributes
 
+      importWithOverlays = system: overlays: import nixpkgs {
+        inherit system;
+        overlays = overlays;
+      };
       nameValuePair = name: value: { inherit name value; };
       genAttrs = names: f: builtins.listToAttrs (map (n: nameValuePair n (f n)) names);
       forAllSystems = f: genAttrs allSystems (system: f {
-        pkgs = import nixpkgs {
-          inherit system;
-        };
-        pkgsNode14 = import nixpkgs {
-          inherit system;
-          overlays = [yarn14Overlay];
-        };
-        pkgsNode16 = import nixpkgs {
-          inherit system;
-          overlays = [yarn16Overlay];
-        };
-        pkgsNode18 = import nixpkgs {
-          inherit system;
-          overlays = [yarn18Overlay];
-        };
-        pkgsNode20 = import nixpkgs {
-          inherit system;
-          overlays = [yarn20Overlay];
-        };
+        pkgs = importWithOverlays system [];
+        pkgsNode14 = importWithOverlays system [yarn14Overlay];
+        pkgsNode16 = importWithOverlays system [yarn16Overlay];
+        pkgsNode18 = importWithOverlays system [yarn18Overlay];
+        pkgsNode20 = importWithOverlays system [yarn20Overlay];
+        pkgsNode22 = importWithOverlays system [yarn22Overlay];
+        pkgsNode24 = importWithOverlays system [yarn24Overlay];
       });
     in
     {
       # Development environment output
-      devShells = forAllSystems ({ pkgs, pkgsNode14, pkgsNode16, pkgsNode18, pkgsNode20 }:
+      devShells = forAllSystems ({ pkgs, pkgsNode14, pkgsNode16, pkgsNode18, pkgsNode20, pkgsNode22, pkgsNode24 }:
         let
           coreShellPackages = [
             pkgs.zsh
@@ -100,6 +118,16 @@
             pkgsNode20.yarn
             pkgs.python3 # required for native compilation of common libraries such as node-sass
           ];
+          coreNode22Packages = [
+            pkgsNode22.nodejs_22
+            pkgsNode24.yarn
+            pkgs.python3 # required for native compilation of common libraries such as node-sass
+          ];
+          coreNode24Packages = [
+            pkgsNode24.nodejs_24
+            pkgsNode24.yarn
+            pkgs.python3 # required for native compilation of common libraries such as node-sass
+          ];
           corePhpPackages = [
             pkgs.libpng
           ];
@@ -111,13 +139,21 @@
             pkgs.php80
             pkgs.php80.packages.composer
           ];
-          php81Packages = [
-            pkgs.php81
-            pkgs.php81.packages.composer
+          php81Packages = with pkgs; [
+            php81
+            php81.packages.composer
           ];
-          php82Packages = [
-            pkgs.php82
-            pkgs.php82.packages.composer
+          php82Packages = with pkgs; [
+            php82
+            php82.packages.composer
+          ];
+          php83Packages = with pkgs; [
+            php83
+            php83.packages.composer
+          ];
+          php84Packages = with pkgs; [
+            php84
+            php84.packages.composer
           ];
           emptyStr = "";
           shellHookCommandFactory = { git ? true, php ? false, node ? false, yarn ? false, pnpm ? false, python ? false, bun ? false, deno ? false }: ''
@@ -175,10 +211,28 @@
             shellHook = nodeShellHookCommand;
           };
 
+          node22 = pkgs.mkShell {
+            packages = with pkgsNode22;
+              coreShellPackages ++ coreDevPackages ++ coreNode22Packages;
+
+            PROJECT_NAME = "NodeJS LTS v22";
+
+            shellHook = nodeShellHookCommand;
+          };
+
+          node24 = pkgs.mkShell {
+            packages = with pkgsNode24;
+              coreShellPackages ++ coreDevPackages ++ coreNode24Packages;
+
+            PROJECT_NAME = "NodeJS LTS v24";
+
+            shellHook = nodeShellHookCommand;
+          };
+
           php74 = pkgs.mkShell {
             packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php74Packages;
 
-            PROJECT_NAME = "PHP74";
+            PROJECT_NAME = "PHP 7.4";
 
             shellHook = phpShellHookCommand;
           };
@@ -186,7 +240,7 @@
           php80 = pkgs.mkShell {
             packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php80Packages;
 
-            PROJECT_NAME = "PHP80";
+            PROJECT_NAME = "PHP 8.0";
 
             shellHook = phpShellHookCommand;
           };
@@ -194,7 +248,7 @@
           php81 = pkgs.mkShell {
             packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php81Packages;
 
-            PROJECT_NAME = "PHP81";
+            PROJECT_NAME = "PHP 8.1";
 
             shellHook = phpShellHookCommand;
           };
@@ -202,7 +256,23 @@
           php82 = pkgs.mkShell {
             packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php82Packages;
 
-            PROJECT_NAME = "PHP82";
+            PROJECT_NAME = "PHP 8.2";
+
+            shellHook = phpShellHookCommand;
+          };
+
+          php83 = pkgs.mkShell {
+            packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php83Packages;
+
+            PROJECT_NAME = "PHP 8.3";
+
+            shellHook = phpShellHookCommand;
+          };
+
+          php84 = pkgs.mkShell {
+            packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php84Packages;
+
+            PROJECT_NAME = "PHP 8.4";
 
             shellHook = phpShellHookCommand;
           };
@@ -250,6 +320,17 @@
           # Default aliases
           node = node18;
           php = php82;
+
+          # Default shell for development in the project
+          default = pkgs.mkShell {
+            packages = [
+              pkgs.nix
+            ] ++ coreShellPackages ++ coreDevPackages;
+
+            PROJECT_NAME = "Default";
+
+            shellHook = shellHookCommandFactory {};
+          };
         }
       );
     };
