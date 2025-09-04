@@ -131,13 +131,15 @@
           corePhpPackages = [
             pkgs.libpng
           ];
-          php74Packages = [
-            nixphps.packages.${pkgs.system}.php74
-            nixphps.packages.${pkgs.system}.php74.packages.composer
+          # NOTE: EOL version of PHP
+          php74Packages = with nixphps.packages.${pkgs.system}; [
+            php74
+            php74.packages.composer
           ];
-          php80Packages = [
-            pkgs.php80
-            pkgs.php80.packages.composer
+          # NOTE: EOL version of PHP
+          php80Packages = with nixphps.packages.${pkgs.system}; [
+            php80
+            php80.packages.composer
           ];
           php81Packages = with pkgs; [
             php81

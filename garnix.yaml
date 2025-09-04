@@ -11,5 +11,4 @@ builds:
     - devShell.x86_64-linux.node14
     - devShell.x86_64-linux.node16
     - devShell.x86_64-linux.node18
-    - devShell.x86_64-linux.php80
     - devShell.x86_64-linux.signalapp/Signal-Desktop
