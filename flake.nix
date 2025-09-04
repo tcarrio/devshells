@@ -318,7 +318,7 @@
           };
 
           # Default aliases
-          node = node18;
+          node = node24;
           php = php82;
 
           # Default shell for development in the project
