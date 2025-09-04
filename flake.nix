@@ -319,7 +319,7 @@
 
           # Default aliases
           node = node24;
-          php = php82;
+          php = php84;
 
           # Default shell for development in the project
           default = pkgs.mkShell {
