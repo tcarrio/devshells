@@ -8,7 +8,7 @@ builds:
     - darwinConfigurations.*
     - nixosConfigurations.*
     # Known broken / EOL versions that require manual overrides
-    - devShell.x86_64-linux.node14
-    - devShell.x86_64-linux.node16
-    - devShell.x86_64-linux.node18
-    - devShell.x86_64-linux.signalapp/Signal-Desktop
+    - devShells.x86_64-linux.node14
+    - devShells.x86_64-linux.node16
+    - devShells.x86_64-linux.node18
+    - devShells.x86_64-linux.signalapp/Signal-Desktop
