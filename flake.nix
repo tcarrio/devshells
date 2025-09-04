@@ -89,6 +89,7 @@
     {
       # Development environment output
       devShells = forAllSystems ({ pkgs, pkgsNode14, pkgsNode16, pkgsNode18, pkgsNode20, pkgsNode22, pkgsNode24 }:
+        with nixphps.packages.${pkgs.system};
         let
           coreShellPackages = [
             pkgs.zsh
@@ -132,28 +133,28 @@
             pkgs.libpng
           ];
           # NOTE: EOL version of PHP
-          php74Packages = with nixphps.packages.${pkgs.system}; [
+          php74Packages = [
             php74
             php74.packages.composer
           ];
           # NOTE: EOL version of PHP
-          php80Packages = with nixphps.packages.${pkgs.system}; [
+          php80Packages = [
             php80
             php80.packages.composer
           ];
-          php81Packages = with pkgs; [
+          php81Packages = [
             php81
             php81.packages.composer
           ];
-          php82Packages = with pkgs; [
+          php82Packages = [
             php82
             php82.packages.composer
           ];
-          php83Packages = with pkgs; [
+          php83Packages = [
             php83
             php83.packages.composer
           ];
-          php84Packages = with pkgs; [
+          php84Packages = [
             php84
             php84.packages.composer
           ];
