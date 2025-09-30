@@ -293,6 +293,16 @@
             shellHook = shellHookCommandFactory { python = true; };
           };
 
+          python310 = pkgs.mkShell {
+            packages = [
+              pkgs.python310
+            ] ++ coreShellPackages ++ coreDevPackages;
+
+            PROJECT_NAME = "Python 3.10";
+
+            shellHook = shellHookCommandFactory { python = true; };
+          };
+
           bun = pkgs.mkShell {
             packages = [
               pkgs.bun
