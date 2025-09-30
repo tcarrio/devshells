@@ -105,32 +105,32 @@
           coreNode14Packages = [
             pkgsNode14.nodejs_14
             pkgsNode14.yarn
-            pkgs.python3 # required for native compilation of common libraries such as node-sass
+            pkgs.python310 # required for native compilation of common libraries such as node-sass
           ];
           coreNode16Packages = [
             pkgsNode16.nodejs_16
             pkgsNode16.yarn
-            pkgs.python3 # required for native compilation of common libraries such as node-sass
+            pkgs.python310 # required for native compilation of common libraries such as node-sass
           ];
           coreNode18Packages = [
             pkgsNode18.nodejs_18
             pkgsNode18.yarn
-            pkgs.python3 # required for native compilation of common libraries such as node-sass
+            pkgs.python310 # required for native compilation of common libraries such as node-sass
           ];
           coreNode20Packages = [
             pkgsNode20.nodejs_20
             pkgsNode20.yarn
-            pkgs.python3 # required for native compilation of common libraries such as node-sass
+            pkgs.python310 # required for native compilation of common libraries such as node-sass
           ];
           coreNode22Packages = [
             pkgsNode22.nodejs_22
             pkgsNode24.yarn
-            pkgs.python3 # required for native compilation of common libraries such as node-sass
+            pkgs.python310 # required for native compilation of common libraries such as node-sass
           ];
           coreNode24Packages = [
             pkgsNode24.nodejs_24
             pkgsNode24.yarn
-            pkgs.python3 # required for native compilation of common libraries such as node-sass
+            pkgs.python310 # required for native compilation of common libraries such as node-sass
           ];
           corePhpPackages = [
             pkgs.libpng
