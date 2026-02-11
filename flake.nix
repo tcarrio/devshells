@@ -161,6 +161,11 @@
             php84
             php84.packages.composer
           ];
+          php85Packages = [
+            php85
+            php85.packages.composer
+          ];
+
           emptyStr = "";
           shellHookCommandFactory = { git ? true, php ? false, node ? false, yarn ? false, pnpm ? false, python ? false, bun ? false, deno ? false }: ''
             echo $ Started devenv shell for $PROJECT_NAME
@@ -177,120 +182,128 @@
           '';
           phpShellHookCommand = shellHookCommandFactory { php = true; };
           nodeShellHookCommand = shellHookCommandFactory { node = true; yarn = true; };
+
+          mkDevShell = args: pkgs.mkShell (
+            args // {
+              packages = coreShellPackages
+                ++ coreDevPackages
+                ++ (if args ? packages  then args.packages else []);
+            }
+          );
+
+          mkPhpShell = args: mkDevShell (
+            args // {
+              packages = corePhpPackages
+                ++ (if args ? packages  then args.packages else []);
+            }
+          );
+
         in rec
         {
           ### Generic language shells (NodeJS, PHP, etc.)
 
-          node14 = pkgs.mkShell {
-            packages = with pkgsNode14;
-              coreShellPackages ++ coreDevPackages ++ coreNode14Packages;
+          node14 = mkDevShell {
+            packages = coreNode14Packages;
 
             PROJECT_NAME = "NodeJS LTS v14";
 
             shellHook = nodeShellHookCommand;
           };
 
-          node16 = pkgs.mkShell {
-            packages = with pkgsNode16;
-              coreShellPackages ++ coreDevPackages ++ coreNode16Packages;
+          node16 = mkDevShell {
+            packages = coreNode16Packages;
 
             PROJECT_NAME = "NodeJS LTS v16";
 
             shellHook = nodeShellHookCommand;
           };
 
-          node18 = pkgs.mkShell {
-            packages = with pkgsNode18;
-              coreShellPackages ++ coreDevPackages ++ coreNode18Packages;
+          node18 = mkDevShell {
+            packages = coreNode18Packages;
 
             PROJECT_NAME = "NodeJS LTS v18";
 
             shellHook = nodeShellHookCommand;
           };
 
-          node20 = pkgs.mkShell {
-            packages = with pkgsNode20;
-              coreShellPackages ++ coreDevPackages ++ coreNode20Packages;
+          node20 = mkDevShell {
+            packages = coreNode20Packages;
 
             PROJECT_NAME = "NodeJS LTS v20";
 
             shellHook = nodeShellHookCommand;
           };
 
-          node22 = pkgs.mkShell {
-            packages = with pkgsNode22;
-              coreShellPackages ++ coreDevPackages ++ coreNode22Packages;
+          node22 = mkDevShell {
+            packages = coreNode22Packages;
 
             PROJECT_NAME = "NodeJS LTS v22";
 
             shellHook = nodeShellHookCommand;
           };
 
-          node24 = pkgs.mkShell {
-            packages = with pkgsNode24;
-              coreShellPackages ++ coreDevPackages ++ coreNode24Packages;
+          node24 = mkDevShell {
+            packages = coreNode24Packages;
 
             PROJECT_NAME = "NodeJS LTS v24";
 
             shellHook = nodeShellHookCommand;
           };
 
-          php74 = pkgs.mkShell {
-            packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php74Packages;
+          php74 = mkPhpShell {
+            packages = php74Packages;
 
             PROJECT_NAME = "PHP 7.4";
 
             shellHook = phpShellHookCommand;
           };
 
-          php80 = pkgs.mkShell {
-            packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php80Packages;
+          php80 = mkPhpShell {
+            packages = php80Packages;
 
             PROJECT_NAME = "PHP 8.0";
 
             shellHook = phpShellHookCommand;
           };
 
-          php81 = pkgs.mkShell {
-            packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php81Packages;
+          php81 = mkPhpShell {
+            packages = php81Packages;
 
             PROJECT_NAME = "PHP 8.1";
 
             shellHook = phpShellHookCommand;
           };
 
-          php82 = pkgs.mkShell {
-            packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php82Packages;
+          php82 = mkPhpShell {
+            packages = php82Packages;
 
             PROJECT_NAME = "PHP 8.2";
 
             shellHook = phpShellHookCommand;
           };
 
-          php83 = pkgs.mkShell {
-            packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php83Packages;
+          php83 = mkPhpShell {
+            packages = php83Packages;
 
             PROJECT_NAME = "PHP 8.3";
 
             shellHook = phpShellHookCommand;
           };
 
-          php84 = pkgs.mkShell {
-            packages = coreShellPackages ++ coreDevPackages ++ corePhpPackages ++ php84Packages;
+          php84 = mkPhpShell {
+            packages = php84Packages;
 
             PROJECT_NAME = "PHP 8.4";
 
             shellHook = phpShellHookCommand;
           };
 
-          python = pkgs.mkShell {
-            packages = [
-              pkgs.python3
-            ] ++ coreShellPackages ++ coreDevPackages;
+          php85 = mkPhpShell {
+            packages = php85Packages;
 
-            PROJECT_NAME = "Python";
+            PROJECT_NAME = "PHP 8.5";
 
-            shellHook = shellHookCommandFactory { python = true; };
+            shellHook = phpShellHookCommand;
           };
 
           python310 = pkgs.mkShell {
@@ -323,25 +336,16 @@
             shellHook = shellHookCommandFactory { deno = true; };
           };
 
-          # Project aliases
-          "signalapp/Signal-Desktop" = pkgs.mkShell {
-            packages = with pkgs; [
-              python3
-              gcc
-              gnumake
-              gnat
-            ] ++ coreShellPackages ++ coreDevPackages ++ coreNode18Packages;
-          };
-
           # Default aliases
           node = node24;
           php = php84;
+          python = python310;
 
           # Default shell for development in the project
-          default = pkgs.mkShell {
+          default = mkDevShell {
             packages = [
               pkgs.nix
-            ] ++ coreShellPackages ++ coreDevPackages;
+            ];
 
             PROJECT_NAME = "Default";
 
