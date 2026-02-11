@@ -17,7 +17,8 @@
 
   # Flake inputs
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs2505.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs2405.url = "github:nixos/nixpkgs/nixos-24.05";
     nixpkgs2305.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs2205.url = "github:nixos/nixpkgs/nixos-22.05";
@@ -25,7 +26,7 @@
   };
 
   # Flake outputs
-  outputs = { self, nixpkgs, nixphps, nixpkgs2405, nixpkgs2305, nixpkgs2205 }:
+  outputs = { self, nixpkgs, nixphps, nixpkgs2205, nixpkgs2305, nixpkgs2405, nixpkgs2505 }:
     let
       # Systems supported
       allSystems = [
@@ -84,7 +85,7 @@
         pkgsNode14 = importWithOverlays nixpkgs2205 system [yarn14Overlay];
         pkgsNode16 = importWithOverlays nixpkgs2305 system [yarn16Overlay];
         pkgsNode18 = importWithOverlays nixpkgs2405 system [yarn18Overlay];
-        pkgsNode20 = importWithOverlays nixpkgs system [yarn20Overlay];
+        pkgsNode20 = importWithOverlays nixpkgs2505 system [yarn20Overlay];
         pkgsNode22 = importWithOverlays nixpkgs system [yarn22Overlay];
         pkgsNode24 = importWithOverlays nixpkgs system [yarn24Overlay];
       });
@@ -135,36 +136,20 @@
           corePhpPackages = [
             pkgs.libpng
           ];
-          # NOTE: EOL version of PHP
-          php74Packages = [
-            php74
-            php74.packages.composer
+
+          phpWithComposer = phpPkg: [
+            phpPkg
+            phpPkg.packages.composer
           ];
-          # NOTE: EOL version of PHP
-          php80Packages = [
-            php80
-            php80.packages.composer
-          ];
-          php81Packages = [
-            php81
-            php81.packages.composer
-          ];
-          php82Packages = [
-            php82
-            php82.packages.composer
-          ];
-          php83Packages = [
-            php83
-            php83.packages.composer
-          ];
-          php84Packages = [
-            php84
-            php84.packages.composer
-          ];
-          php85Packages = [
-            php85
-            php85.packages.composer
-          ];
+
+          php85Packages = phpWithComposer pkgs.php85;
+          php84Packages = phpWithComposer pkgs.php84;
+          php83Packages = phpWithComposer pkgs.php83;
+          php82Packages = phpWithComposer pkgs.php82;
+          # ⚠️ EOL versions of PHP ⬇️
+          php81Packages = phpWithComposer php81;
+          php80Packages = phpWithComposer php80;
+          php74Packages = phpWithComposer php74;
 
           emptyStr = "";
           shellHookCommandFactory = { git ? true, php ? false, node ? false, yarn ? false, pnpm ? false, python ? false, bun ? false, deno ? false }: ''
