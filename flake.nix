@@ -74,25 +74,30 @@
 
       # Helper to provide system-specific attributes
 
-      importWithOverlays = input: system: overlays: import input {
+      importWithOverlays = input: system: overrides: import input {
         inherit system;
-        overlays = overlays;
+        overlays = overrides.overlays or [];
+        config = overrides.config or {};
       };
       nameValuePair = name: value: { inherit name value; };
       genAttrs = names: f: builtins.listToAttrs (map (n: nameValuePair n (f n)) names);
       forAllSystems = f: genAttrs allSystems (system: f {
-        pkgs = importWithOverlays nixpkgs system [];
-        pkgsNode14 = importWithOverlays nixpkgs2205 system [yarn14Overlay];
-        pkgsNode16 = importWithOverlays nixpkgs2305 system [yarn16Overlay];
-        pkgsNode18 = importWithOverlays nixpkgs2405 system [yarn18Overlay];
-        pkgsNode20 = importWithOverlays nixpkgs2505 system [yarn20Overlay];
-        pkgsNode22 = importWithOverlays nixpkgs system [yarn22Overlay];
-        pkgsNode24 = importWithOverlays nixpkgs system [yarn24Overlay];
+        pkgs = importWithOverlays nixpkgs system {};
+        pkgsNode16 = importWithOverlays nixpkgs2305 system {
+          overlays = [yarn16Overlay];
+          config.permittedInsecurePackages = [
+            "nodejs-16.20.2"
+          ];
+        };
+        pkgsNode18 = importWithOverlays nixpkgs2405 system { overlays = [yarn18Overlay]; };
+        pkgsNode20 = importWithOverlays nixpkgs2505 system { overlays = [yarn20Overlay]; };
+        pkgsNode22 = importWithOverlays nixpkgs system { overlays = [yarn22Overlay]; };
+        pkgsNode24 = importWithOverlays nixpkgs system { overlays = [yarn24Overlay]; };
       });
     in
     {
       # Development environment output
-      devShells = forAllSystems ({ pkgs, pkgsNode14, pkgsNode16, pkgsNode18, pkgsNode20, pkgsNode22, pkgsNode24 }:
+      devShells = forAllSystems ({ pkgs, pkgsNode16, pkgsNode18, pkgsNode20, pkgsNode22, pkgsNode24 }:
         with nixphps.packages.${pkgs.system};
         let
           coreShellPackages = [
@@ -102,11 +107,6 @@
             pkgs.git
             pkgs.jq
             pkgs.sops
-          ];
-          coreNode14Packages = [
-            pkgsNode14.nodejs_14
-            pkgsNode14.yarn
-            pkgs.python310 # required for native compilation of common libraries such as node-sass
           ];
           coreNode16Packages = [
             pkgsNode16.nodejs_16
@@ -186,14 +186,6 @@
         in rec
         {
           ### Generic language shells (NodeJS, PHP, etc.)
-
-          node14 = mkDevShell {
-            packages = coreNode14Packages;
-
-            PROJECT_NAME = "NodeJS LTS v14";
-
-            shellHook = nodeShellHookCommand;
-          };
 
           node16 = mkDevShell {
             packages = coreNode16Packages;
